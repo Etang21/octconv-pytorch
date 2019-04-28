@@ -36,14 +36,14 @@ class OctConv2d(nn.Module):
         self.has_out_l = out_channels_l > 0
         
         # Create conv layers
+        # self.conv_hh stores weight W^{H -> H}. Analagous notation for other conv layers.
         self.conv_hh = nn.Conv2d(in_channels_h, out_channels_h, kernel_size, stride=stride, padding=padding)
         if self.has_in_l and self.has_out_l:
             self.conv_ll = nn.Conv2d(in_channels_l, out_channels_l, kernel_size, stride=stride, padding=padding)
         if self.has_in_l:
-            pass
-            # TODO: Initialize self.conv_lh
+            self.conv_lh = nn.Conv2d(in_channels_l, out_channels_h, kernel_size, stride=stride, padding=padding)
+            self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
         if self.has_out_l:
-            pass
             # TODO: Initialize self.conv_hl
     
     def forward(self, x_h, x_l):
@@ -55,16 +55,19 @@ class OctConv2d(nn.Module):
         - x_l: Input low-frequency data, of shape(N, alpha_in * C, H / 2, W / 2)
         
         Returns a tuple of:
-        - out_h: High-frequency outputs, of shape (N, (1 - alpha_out) * F, H, W)
-        - out_l: Low-frequency outputs, of shape (N, alpha_out * F, H / 2, W / 2) or None if alpha_out = 0
+        - out_h: High-frequency outputs, of shape (N, (1 - alpha_out) * F, H', W')
+        - out_l: Low-frequency outputs, of shape (N, alpha_out * F, H' / 2, W' / 2) or None if alpha_out = 0
         """
         out_h, out_l = None, None
+        
         out_h = self.conv_hh(x_h)
+        assert out_h.shape[2] % 2 == 0, "OctConv output width not divisible by 2"
+        assert out_h.shape[3] % 2 == 0, "OctConv output height not divisible by 2"
+        
         if self.has_in_l and self.has_out_l:
             out_l = self.conv_ll(x_l)
         if self.has_in_l:
-            pass
-            # TODO: Implement forward pass from l to h, add to out_h
+            out_h += self.upsample(self.conv_lh(x_l))
         if self.has_out_l:
             pass
             # TODO: Implement forward pass from h to l, add to out_l
