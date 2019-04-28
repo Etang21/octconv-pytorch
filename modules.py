@@ -7,7 +7,7 @@ import torch.nn as nn
 
 class OctConv2d(nn.Module):
     
-    def __init__(self, in_channels, out_channels, kernel_size, alpha_in, alpha_out):
+    def __init__(self, in_channels, out_channels, kernel_size, alpha_in, alpha_out, stride=1, padding=0):
         """
         Initializes an Octave Convolution (OctConv) layer.
         
@@ -36,9 +36,9 @@ class OctConv2d(nn.Module):
         self.has_out_l = out_channels_l > 0
         
         # Create conv layers
-        self.conv_hh = nn.Conv2d(in_channels_h, out_channels_h, kernel_size)
+        self.conv_hh = nn.Conv2d(in_channels_h, out_channels_h, kernel_size, stride=stride, padding=padding)
         if self.has_in_l and self.has_out_l:
-            self.conv_ll = nn.Conv2d(in_channels_l, out_channels_l, kernel_size)
+            self.conv_ll = nn.Conv2d(in_channels_l, out_channels_l, kernel_size, stride=stride, padding=padding)
         if self.has_in_l:
             pass
             # TODO: Initialize self.conv_lh
