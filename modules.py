@@ -19,8 +19,10 @@ class OctConv2d(nn.Module):
             - alpha_in * in_channels must be an integer
         - alpha_out: Porportion of outgoing channels that are low frequency
             - alpha_out * out_channels must be an integer
+        - stride: Stride of convolutional kernel
+        - padding: Padding for convolutional kernel
             
-        # TODO: Add stride, padding, and other params
+        # TODO: Add other params that nn.Conv2d also supports
         """
         super().__init__()
         
@@ -36,7 +38,7 @@ class OctConv2d(nn.Module):
         self.has_out_l = out_channels_l > 0
         
         # Create conv layers
-        # self.conv_hh stores weight W^{H -> H}. Analagous notation for other conv layers.
+        # self.conv_hh stores weight W^{H -> H}. Analogous notation for other conv layers.
         self.conv_hh = nn.Conv2d(in_channels_h, out_channels_h, kernel_size, stride=stride, padding=padding)
         if self.has_in_l and self.has_out_l:
             self.conv_ll = nn.Conv2d(in_channels_l, out_channels_l, kernel_size, stride=stride, padding=padding)
@@ -44,7 +46,8 @@ class OctConv2d(nn.Module):
             self.conv_lh = nn.Conv2d(in_channels_l, out_channels_h, kernel_size, stride=stride, padding=padding)
             self.upsample = nn.Upsample(scale_factor=2, mode='nearest')
         if self.has_out_l:
-            # TODO: Initialize self.conv_hl
+            self.conv_hl = nn.Conv2d(in_channels_h, out_channels_l, kernel_size, stride=stride, padding=padding)
+            self.pool = nn.AvgPool2d((2, 2), stride=2)
     
     def forward(self, x_h, x_l):
         """
@@ -53,6 +56,7 @@ class OctConv2d(nn.Module):
         Inputs:
         - x_h: Input high-frequency data, of shape (N, (1 - alpha_in) * C, H, W)
         - x_l: Input low-frequency data, of shape(N, alpha_in * C, H / 2, W / 2)
+            - If alpha_in = 0, x_l can be anything
         
         Returns a tuple of:
         - out_h: High-frequency outputs, of shape (N, (1 - alpha_out) * F, H', W')
@@ -69,6 +73,5 @@ class OctConv2d(nn.Module):
         if self.has_in_l:
             out_h += self.upsample(self.conv_lh(x_l))
         if self.has_out_l:
-            pass
-            # TODO: Implement forward pass from h to l, add to out_l
+            out_l += self.conv_hl(self.pool(x_h))
         return out_h, out_l
