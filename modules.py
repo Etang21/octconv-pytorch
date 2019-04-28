@@ -26,16 +26,25 @@ class OctConv2d(nn.Module):
         
         # Compute number of high-freq and low-freq channels
         in_channels_l, out_channels_l = alpha_in * in_channels, alpha_out * out_channels
-        assert in_channels_l.is_integer(), "Incompatible in_channels, alpha_in"
-        assert out_channels_l.is_integer(), "Incompatible out_channels, alpha_out"
+        assert float(in_channels_l).is_integer(), "Incompatible in_channels, alpha_in"
+        assert float(out_channels_l).is_integer(), "Incompatible out_channels, alpha_out"
         in_channels_l, out_channels_l = int(in_channels_l), int(out_channels_l)
         in_channels_h, out_channels_h = in_channels - in_channels_l, out_channels - out_channels_l
         
+        # Check for low-freq outputs or inputs
+        self.has_in_l = in_channels_l > 0
+        self.has_out_l = out_channels_l > 0
+        
         # Create conv layers
         self.conv_hh = nn.Conv2d(in_channels_h, out_channels_h, kernel_size)
-        self.conv_ll = nn.Conv2d(in_channels_l, out_channels_l, kernel_size)
-        # TODO: Initialize self.conv_hl
-        # TODO: Initialize self.conv_lh
+        if self.has_in_l and self.has_out_l:
+            self.conv_ll = nn.Conv2d(in_channels_l, out_channels_l, kernel_size)
+        if self.has_in_l:
+            pass
+            # TODO: Initialize self.conv_lh
+        if self.has_out_l:
+            pass
+            # TODO: Initialize self.conv_hl
     
     def forward(self, x_h, x_l):
         """
@@ -47,10 +56,16 @@ class OctConv2d(nn.Module):
         
         Returns a tuple of:
         - out_h: High-frequency outputs, of shape (N, (1 - alpha_out) * F, H, W)
-        - out_l: Low-frequency outputs, of shape (N, alpha_out * F, H / 2, W / 2)
+        - out_l: Low-frequency outputs, of shape (N, alpha_out * F, H / 2, W / 2) or None if alpha_out = 0
         """
+        out_h, out_l = None, None
         out_h = self.conv_hh(x_h)
-        out_l = self.conv_ll(x_l)
-        # TODO: Implement forward pass from h to l
-        # TODO: Implement forward pass from l to h
+        if self.has_in_l and self.has_out_l:
+            out_l = self.conv_ll(x_l)
+        if self.has_in_l:
+            pass
+            # TODO: Implement forward pass from l to h, add to out_h
+        if self.has_out_l:
+            pass
+            # TODO: Implement forward pass from h to l, add to out_l
         return out_h, out_l
