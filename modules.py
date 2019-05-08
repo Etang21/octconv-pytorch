@@ -64,14 +64,16 @@ class OctConv2d(nn.Module):
         """
         out_h, out_l = None, None
         
+        # Compute out_h
         out_h = self.conv_hh(x_h)
         assert out_h.shape[2] % 2 == 0, "OctConv output width not divisible by 2"
         assert out_h.shape[3] % 2 == 0, "OctConv output height not divisible by 2"
-        
-        if self.has_in_l and self.has_out_l:
-            out_l = self.conv_ll(x_l)
         if self.has_in_l:
             out_h += self.upsample(self.conv_lh(x_l))
+            
+        # Compute out_l
         if self.has_out_l:
-            out_l += self.conv_hl(self.pool(x_h))
+            out_l = self.conv_hl(self.pool(x_h))
+            if self.has_in_l:
+                out_l += self.conv_ll(x_l)
         return out_h, out_l
