@@ -1,3 +1,5 @@
 __pycache__/
 .ipynb_checkpoints/
 tiny-imagenet-200/
+mini_resnet18.pth
+
