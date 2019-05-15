@@ -147,29 +147,6 @@ def get_stacked_4(alpha, hidden_channels, C, H, W, D_out):
         )
     return model
 
-
-
-def get_FourLayerConvNet(hidden_channels, C, H, W, D_out):
-    """
-    Returns vanilla 4-layer CNN as in modules, using stacked format.
-
-    """
-    model = nn.Sequential(
-        nn.conv2D(C, hidden_channels, (3, 3), 0, alpha, stride=1, padding=1),
-        nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
-        nn.ReLu(),
-        nn.MaxPool2d(2),
-        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
-        nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, 0, stride=1, padding=1),
-        nn.ReLu(),
-        nn.MaxPool2d(2),
-        Flatten(),
-        nn.Linear(hidden_channels * (H // 4) * (W // 4), D_out)
-        )
-    return model
-
 def get_SixLayerConvNet():
     """
     Returns vanilla convolutional network with six convolutional layers.
