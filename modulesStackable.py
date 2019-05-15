@@ -146,3 +146,59 @@ def get_stacked_4(alpha, hidden_channels, C, H, W, D_out):
         nn.Linear(hidden_channels * (H // 4) * (W // 4), D_out)
         )
     return model
+
+
+
+def get_FourLayerConvNet(hidden_channels, C, H, W, D_out):
+    """
+    Returns vanilla 4-layer CNN as in modules, using stacked format.
+
+    """
+    model = nn.Sequential(
+        nn.conv2D(C, hidden_channels, (3, 3), 0, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
+        nn.ReLu(),
+        nn.MaxPool2d(2),
+        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, 0, stride=1, padding=1),
+        nn.ReLu(),
+        nn.MaxPool2d(2),
+        Flatten(),
+        nn.Linear(hidden_channels * (H // 4) * (W // 4), D_out)
+        )
+    return model
+
+def get_SixLayerConvNet():
+    """
+    Returns vanilla convolutional network with six convolutional layers.
+    
+    Current implementation does not use Batchnorm. We should add Batchnorm to OctConv layers soon for a fair comparison.
+    """
+    channels = [3, 32, 32, 32, 32, 32, 32]
+    fc_1 = 32
+    num_classes = 10
+    
+    model = nn.Sequential(
+        nn.Conv2d(channels[0], channels[1], (3, 3), padding=1),
+        nn.ReLU(),
+        nn.Conv2d(channels[1], channels[2], (3, 3), padding=1),
+        nn.ReLU(),
+        nn.Conv2d(channels[2], channels[3], (2, 2), padding=0, stride=2), # Downsamples
+        nn.ReLU(),
+        nn.Conv2d(channels[3], channels[4], (3, 3), padding=1),
+        nn.ReLU(),
+        nn.Conv2d(channels[4], channels[5], (3, 3), padding=1),
+        nn.ReLU(),
+        nn.Conv2d(channels[5], channels[6], (2, 2), padding=0, stride=2), # Downsamples
+        nn.ReLU(),
+        Flatten(),
+        nn.Linear(channels[6] * 8 * 8, fc_1),
+        nn.ReLU(),
+        nn.Linear(fc_1, num_classes))
+
+    for m in model.modules():
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            nn.init.kaiming_normal_(m.weight)
+    return model
