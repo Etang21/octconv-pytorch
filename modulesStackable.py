@@ -179,3 +179,32 @@ def get_SixLayerConvNet():
         if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
             nn.init.kaiming_normal_(m.weight)
     return model
+
+
+def get_SixLayerOctConvNet(alpha, hidden_channels, C, H, W, fc_1, D_out):
+    """
+    Returns stacked 4 layer octConvNet as in modules, using stacked format.
+
+    """
+    model = nn.Sequential(
+        nn.Conv2d(C, hidden_channels, (3, 3), padding=1), # First layer is conv2D as in paper
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), 0, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (2, 2), alpha, alpha, padding=0, stride=2), # Downsamples
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dStackable(hidden_channels, hidden_channels, (2, 2), alpha, 0, padding=0, stride=2), # Downsamples
+        nn.ReLU(),
+        Flatten(),
+        nn.Linear(hidden_channels * (H // 4) * (W // 4), fc_1),
+        nn.ReLU(),
+        nn.Linear(fc_1, D_out)
+        )
+    
+    # TODO: Add Kaiming-He initialization code here?
+    
+    return model
