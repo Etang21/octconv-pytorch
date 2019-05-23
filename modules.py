@@ -97,9 +97,53 @@ class OctConv2d(nn.Module):
             if self.has_in_l:
                 out_l += self.conv_ll(x_l)
         return out_h, out_l
+
+    def decompose_input(self, input):
+        """
+        Disassembles Numpy array into x_l and x_h for consumption by OctConv2d.
+        
+        Inputs:
+        (MODIFIED -- Now takes input in the form x_h, (2x2 square of x_l's))
+        (x_l is cut into four pieces N wise, then stacked as follows, where we're observing from
+        (the bottom zero index of each tensor:
+        ( 0 1 -- W
+        ( 2 3
+        (  |
+        (  H
+
+        - x_h: Input high-frequency data, of shape (N, (1 - alpha_in) * C, H, W)
+        - x_l: Input low-frequency data, of shape(N, alpha_in * C, H / 2, W / 2)
+            - If alpha_in = 0, x_l can be anything
+        """
+        x_h, x_l_aggregate = torch.split(input, [self.in_channels_h, self.in_channels_l//4], dim=1)
+        x_l_01, x_l_23  = torch.split(x_l_aggregate, x_l_aggregate.shape[2]//2, dim=2)
+        x_l_0, x_l_1 = torch.split(x_l_01, x_l_01.shape[3]//2, dim=3)
+        x_l_2, x_l_3 = torch.split(x_l_23, x_l_23.shape[3]//2, dim=3)
+        x_l = torch.cat((x_l_0, x_l_1, x_l_2, x_l_3), dim=1)
+        return x_h, x_l
     
+    def compose_output(self, out_h, out_l):
+        """
+        Reassembles x_h and x_l into an output numpy array (the h-2x2_l shape tensor).
+        
+        Uses the reverse of the method documented in decompose_input
+        """
+        if out_l is not None:
+            out_l_0, out_l_1, out_l_2, out_l_3 = torch.split(out_l, [out_l.shape[1]//4, out_l.shape[1]//4, out_l.shape[1]//4, out_l.shape[1]//4], dim=1)
+            out_l_01 = torch.cat((out_l_0, out_l_1), dim=3)
+            out_l_23 = torch.cat((out_l_2, out_l_3), dim=3)
+            out_l_aggregate = torch.cat((out_l_01, out_l_23), dim=2)
+            out = torch.cat((out_h, out_l_aggregate), dim=1)
+            return out
+        else:
+            return out_h
 
 class OctConv2dStackable(OctConv2d):
+    """
+    Wrapper for OctConv2d. Takes in one numpy array as input and outputs one as output.
+    
+    Useful for adding to sequential modules!
+    """
     
     def __init__(self, in_channels, out_channels, kernel_size, alpha_in, alpha_out, stride=1, padding=0):
         """
@@ -132,34 +176,18 @@ class OctConv2dStackable(OctConv2d):
         (  |
         (  H
 
-        - x_h: Input high-frequency data, of shape (N, (1 - alpha_in) * C, H, W)
-        - x_l: Input low-frequency data, of shape(N, alpha_in * C, H / 2, W / 2)
-            - If alpha_in = 0, x_l can be anything
-        
         Returns:
-        - Analogously structured numpy array of outputs.
+        - Analogously structured numpy array containing out_h and out_l.
         """
         
-        # Build up
-        x_h, x_l_aggregate = torch.split(input, [self.in_channels_h, self.in_channels_l//4], dim=1)
-        x_l_01, x_l_23  = torch.split(x_l_aggregate, x_l_aggregate.shape[2]//2, dim=2)
-        x_l_0, x_l_1 = torch.split(x_l_01, x_l_01.shape[3]//2, dim=3)
-        x_l_2, x_l_3 = torch.split(x_l_23, x_l_23.shape[3]//2, dim=3)
-        x_l = torch.cat((x_l_0, x_l_1, x_l_2, x_l_3), dim=1)
+        # Decompose input into x_l and x_h using the food-in-fridge method
+        x_h, x_l = super().decompose_input(input)
 
         # Apply Octave Convolutions
         out_h, out_l = super().forward(x_h, x_l)
         
         # Rebuild the h-2x2_l shape tensor
-        if out_l is not None:
-            out_l_0, out_l_1, out_l_2, out_l_3 = torch.split(out_l, [out_l.shape[1]//4, out_l.shape[1]//4, out_l.shape[1]//4, out_l.shape[1]//4], dim=1)
-            out_l_01 = torch.cat((out_l_0, out_l_1), dim=3)
-            out_l_23 = torch.cat((out_l_2, out_l_3), dim=3)
-            out_l_aggregate = torch.cat((out_l_01, out_l_23), dim=2)
-            out = torch.cat((out_h, out_l_aggregate), dim=1)
-            return out
-        else:
-            return out_h
+        return super().compose_output(out_h, out_l)
 
         
 def flatten(x):
@@ -187,12 +215,12 @@ def get_stacked_4(alpha, hidden_channels, C, H, W, D_out):
         OctConv2dStackable(C, hidden_channels, (3, 3), 0, alpha, stride=1, padding=1),
         nn.ReLU(),
         OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
-        nn.ReLu(),
+        nn.ReLU(),
         nn.MaxPool2d(2),
         OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
         nn.ReLU(),
         OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, 0, stride=1, padding=1),
-        nn.ReLu(),
+        nn.ReLU(),
         nn.MaxPool2d(2),
         Flatten(),
         nn.Linear(hidden_channels * (H // 4) * (W // 4), D_out)
