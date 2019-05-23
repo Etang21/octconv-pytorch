@@ -189,6 +189,34 @@ class OctConv2dStackable(OctConv2d):
         # Rebuild the h-2x2_l shape tensor
         return super().compose_output(out_h, out_l)
 
+    
+class OctConv2dBN(OctConv2d):
+    """
+    Implements an OctConv2d layer with batchnormalization for each feature map.
+    Also uses the tricks from OctConv2dStackable to take one input and one output.
+    """
+    
+    def __init__(self, in_channels, out_channels, kernel_size, alpha_in, alpha_out, stride=1, padding=0):
+        """
+        Initializes OctConv2d layer with batchnorm for both frequencies.
+        Further documentation in OctConv2d class.
+        """
+        super().__init__(in_channels, out_channels, kernel_size, 
+                         alpha_in, alpha_out, stride=stride, padding=padding)
+        self.bn_h = nn.BatchNorm2d(self.in_channels_h)
+        self.bn_l = nn.BatchNorm2d(self.in_channels_l)
+    
+    def forward(self, input):
+        """
+        Computes a forward pass for the OctConv layer.
+        Applies decomposition -> batchnorm -> octconv -> composition.
+        """
+        x_h, x_l = super().decompose_input(input)
+        x_h = self.bn_h(x_h)
+        x_l = self.bn_l(x_l)
+        out_h, out_l = super().forward(x_h, x_l)
+        return super().compose_output(out_h, out_l)
+    
         
 def flatten(x):
     """
@@ -220,6 +248,27 @@ def get_stacked_4(alpha, hidden_channels, C, H, W, D_out):
         OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
         nn.ReLU(),
         OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, 0, stride=1, padding=1),
+        nn.ReLU(),
+        nn.MaxPool2d(2),
+        Flatten(),
+        nn.Linear(hidden_channels * (H // 4) * (W // 4), D_out)
+        )
+    return model
+
+def get_stacked_4BN(alpha, hidden_channels, C, H, W, D_out):
+    """
+    Returns stacked 4 layer octConvNet with Batchnorm at each OctConv layer.
+
+    """
+    model = nn.Sequential(
+        OctConv2dBN(C, hidden_channels, (3, 3), 0, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dBN(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        nn.MaxPool2d(2),
+        OctConv2dBN(hidden_channels, hidden_channels, (3, 3), alpha, alpha, stride=1, padding=1),
+        nn.ReLU(),
+        OctConv2dBN(hidden_channels, hidden_channels, (3, 3), alpha, 0, stride=1, padding=1),
         nn.ReLU(),
         nn.MaxPool2d(2),
         Flatten(),
