@@ -179,7 +179,6 @@ class OctConv2dStackable(OctConv2d):
         Returns:
         - Analogously structured numpy array containing out_h and out_l.
         """
-        
         # Decompose input into x_l and x_h using the food-in-fridge method
         x_h, x_l = super().decompose_input(input)
 
@@ -188,7 +187,6 @@ class OctConv2dStackable(OctConv2d):
         
         # Rebuild the h-2x2_l shape tensor
         return super().compose_output(out_h, out_l)
-
     
 class OctConv2dBN(OctConv2d):
     """
@@ -202,20 +200,25 @@ class OctConv2dBN(OctConv2d):
         Further documentation in OctConv2d class.
         """
         super().__init__(in_channels, out_channels, kernel_size, 
-                         alpha_in, alpha_out, stride=stride, padding=padding)
-        self.bn_h = nn.BatchNorm2d(self.in_channels_h)
-        self.bn_l = nn.BatchNorm2d(self.in_channels_l)
+                 alpha_in, alpha_out, stride=stride, padding=padding)
+        self.bn_h = nn.BatchNorm2d(int(in_channels * (1 - alpha_in)))
+        self.bn_l = nn.BatchNorm2d(int(in_channels * alpha_in))
+
     
     def forward(self, input):
         """
         Computes a forward pass for the OctConv layer.
         Applies decomposition -> batchnorm -> octconv -> composition.
         """
-        x_h, x_l = super().decompose_input(input)
-        x_h = self.bn_h(x_h)
-        x_l = self.bn_l(x_l)
+        x_h, x_l = self.decompose_input(input)
+        
+        if self.bn_h.num_features > 0:
+            x_h = self.bn_h(x_h)
+        if self.bn_l.num_features > 0:
+            x_l = self.bn_l(x_l)
+            
         out_h, out_l = super().forward(x_h, x_l)
-        return super().compose_output(out_h, out_l)
+        return self.compose_output(out_h, out_l)
     
         
 def flatten(x):
