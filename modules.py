@@ -90,6 +90,7 @@ class OctConv2d(nn.Module):
         out_h = self.conv_hh(x_h)
         assert out_h.shape[2] % 2 == 0 or not self.has_out_l, "OctConv output width not divisible by 2"
         assert out_h.shape[3] % 2 == 0 or not self.has_out_l, "OctConv output height not divisible by 2"
+        # Some issue with downsampling here in the last layer
         if self.has_in_l:
             out_h += self.upsample(self.conv_lh(x_l))
             
@@ -117,7 +118,8 @@ class OctConv2d(nn.Module):
         - x_l: Input low-frequency data, of shape(N, alpha_in * C, H / 2, W / 2)
             - If alpha_in = 0, x_l can be anything
         """
-
+        if self.in_channels_l == 0:
+            return input, None
         x_h, x_l_aggregate = torch.split(input, [self.in_channels_h, self.in_channels_l//4], dim=1)
         x_l_01, x_l_23  = torch.split(x_l_aggregate, x_l_aggregate.shape[2]//2, dim=2)
         x_l_0, x_l_1 = torch.split(x_l_01, x_l_01.shape[3]//2, dim=3)

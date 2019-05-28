@@ -13,7 +13,7 @@ Oct2d = modules.OctConv2dStackable
 OctConv2d = modules.OctConv2d
 Oct2dBN = modules.OctConv2dBN
 
-
+# Not even used but w/e
 def conv3x3(in_planes, out_planes, alpha_in=.25, alpha_out=.25, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, 3, alpha_in, alpha_out, stride=stride,
@@ -49,10 +49,8 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         identity = x
-        print(x.shape)
         out = self.conv1bn(x)
         out = self.relu(out)
-        print(out.shape)
         out = self.conv2bn(out)
 
         if self.downsample is not None:
@@ -165,6 +163,11 @@ class OctaveResNet(nn.Module):
         norm_layer = self._norm_layer
         downsample = None
         previous_dilation = self.dilation
+        alpha = self.alpha
+        given_stride = stride
+        if final_layer:
+            alpha = 0
+            stride = 1
         if dilate:
             self.dilation *= stride
             stride = 1
@@ -172,11 +175,13 @@ class OctaveResNet(nn.Module):
             downsample = nn.Sequential(
                 #conv1x1(self.inplanes, planes * block.expansion, stride),
                 #norm_layer(planes * block.expansion),
-                Oct2dBN(self.inplanes, planes * block.expansion, (1, 1), self.alpha, self.alpha, stride)
+                Oct2dBN(self.inplanes, planes * block.expansion, (1, 1), self.alpha, alpha, stride)
             )
+        # Right now, last layer can't downsample due to size changes? Not sure if this is a TODO
+
 
         layers = []
-        layers.append(block(self.inplanes, planes, self.alpha, self.alpha, self.alpha, stride, downsample, self.groups,
+        layers.append(block(self.inplanes, planes, self.alpha, self.alpha, alpha, stride, downsample, self.groups,
                             self.base_width, previous_dilation, norm_layer))
 
         self.inplanes = planes * block.expansion
@@ -184,7 +189,11 @@ class OctaveResNet(nn.Module):
             alpha = self.alpha
             if final_layer:
                 alpha=0
-            layers.append(block(self.inplanes, planes, alpha_out=alpha, groups=self.groups,
+            if _ == 1 and final_layer:
+                layers.append(block(self.inplanes, planes, alpha_in=alpha, alpha_out=alpha, groups=self.groups,
+                                base_width=self.base_width, dilation=self.dilation,
+                                norm_layer=norm_layer, stride=given_stride, downsample=nn.Sequential(Oct2dBN(self.inplanes, planes * block.expansion, (1, 1), alpha, alpha, given_stride))))
+            layers.append(block(self.inplanes, planes, alpha_in=alpha, alpha_out=alpha, groups=self.groups,
                                 base_width=self.base_width, dilation=self.dilation,
                                 norm_layer=norm_layer))
 
@@ -258,8 +267,8 @@ def tinyoctresnet18(pretrained=False, progress=True, **kwargs):
     return _resnet('resnet18', BasicBlock, [2,2,2,2], pretrained, progress, num_classes=200, alpha=.25, **kwargs)
     #num_classes=1000, zero_init_residual=False, alpha=.25, groups=1, width_per_group=64, replace_stride_with_dilation=None, norm_layer=None):
 
-def _resnet(arch, inplanes, planes, pretrained, progress, **kwargs):
-    model = OctaveResNet(inplanes, planes, **kwargs)
+def _resnet(arch, blocktype, layers, pretrained, progress, **kwargs):
+    model = OctaveResNet(blocktype, layers, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
