@@ -10,3 +10,4 @@ while read img class x1 y1 x2 y2; do
     mv "images/$img" $class
 done < val_annotations.txt
 
+rm -r images
