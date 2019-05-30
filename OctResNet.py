@@ -55,7 +55,6 @@ class BasicBlock(nn.Module):
 
         if self.downsample is not None:
             identity = self.downsample(x)
-
         out += identity
         out = self.relu(out)
 
@@ -126,19 +125,18 @@ class OctaveResNet(nn.Module):
         self.groups = groups
         self.base_width = width_per_group
         #Convolve, break, then normalize, pool, etc.
-        self.conv1 = Oct2d(3, self.inplanes, (7, 7), 0, self.alpha, stride=2, padding=3)
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3)
         #self.conv1bn = Oct2dBN(inplanes, planes, (3, 3), alpha_in, alpha_out, stride=stride, padding=dilation)
-        self.bnLow = norm_layer(int(self.inplanes*self.alpha))
-        self.bnHigh = norm_layer(int(self.inplanes*(1 - self.alpha)))
+        self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer1 = self._make_layer(block, 64, layers[0], alpha_in=0)
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
-                                       dilate=replace_stride_with_dilation[0])
+                                       dilate=replace_stride_with_dilation[0],alpha_in = self.alpha)
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
-                                       dilate=replace_stride_with_dilation[1])
+                                       dilate=replace_stride_with_dilation[1], alpha_in=self.alpha)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
-                                       dilate=replace_stride_with_dilation[2], final_layer=True)
+                                       dilate=replace_stride_with_dilation[2], alpha_in=self.alpha, final_layer=True)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
@@ -159,7 +157,7 @@ class OctaveResNet(nn.Module):
         #         elif isinstance(m, BasicBlock):
         #             nn.init.constant_(m.bn2.weight, 0)
 
-    def _make_layer(self, block, planes, blocks, stride=1, dilate=False, final_layer=False):
+    def _make_layer(self, block, planes, blocks, stride=1, dilate=False, final_layer=False, alpha_in=0):
         norm_layer = self._norm_layer
         downsample = None
         previous_dilation = self.dilation
@@ -171,17 +169,17 @@ class OctaveResNet(nn.Module):
         if dilate:
             self.dilation *= stride
             stride = 1
-        if stride != 1 or self.inplanes != planes * block.expansion:
+        if stride != 1 or self.inplanes != planes * block.expansion or alpha_in==0:
             downsample = nn.Sequential(
                 #conv1x1(self.inplanes, planes * block.expansion, stride),
                 #norm_layer(planes * block.expansion),
-                Oct2dBN(self.inplanes, planes * block.expansion, (1, 1), self.alpha, alpha, stride)
+                Oct2dBN(self.inplanes, planes * block.expansion, (1, 1), alpha_in, alpha, stride)
             )
         # Right now, last layer can't downsample due to size changes? Not sure if this is a TODO
 
 
         layers = []
-        layers.append(block(self.inplanes, planes, self.alpha, self.alpha, alpha, stride, downsample, self.groups,
+        layers.append(block(self.inplanes, planes, alpha_in, self.alpha, alpha, stride, downsample, self.groups,
                             self.base_width, previous_dilation, norm_layer))
 
         self.inplanes = planes * block.expansion
@@ -193,10 +191,10 @@ class OctaveResNet(nn.Module):
                 layers.append(block(self.inplanes, planes, alpha_in=alpha, alpha_out=alpha, groups=self.groups,
                                 base_width=self.base_width, dilation=self.dilation,
                                 norm_layer=norm_layer, stride=given_stride, downsample=nn.Sequential(Oct2dBN(self.inplanes, planes * block.expansion, (1, 1), alpha, alpha, given_stride))))
-            layers.append(block(self.inplanes, planes, alpha_in=alpha, alpha_out=alpha, groups=self.groups,
+            else:
+                layers.append(block(self.inplanes, planes, alpha_in=alpha, alpha_out=alpha, groups=self.groups,
                                 base_width=self.base_width, dilation=self.dilation,
                                 norm_layer=norm_layer))
-
         return nn.Sequential(*layers)
     
     def decompose_input(self, input):
@@ -245,11 +243,9 @@ class OctaveResNet(nn.Module):
         # Initial alpha split
 
         x = self.conv1(x)
-        x_h, x_l = self.decompose_input(x)
-        x_h = self.maxpool(self.relu(self.bnHigh(x_h)))
-        x_l = self.maxpool(self.relu(self.bnLow(x_l)))
-
-        x = self.compose_output(x_h, x_l)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
 
         x = self.layer1(x)
         x = self.layer2(x)
