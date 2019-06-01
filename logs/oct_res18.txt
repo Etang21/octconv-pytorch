@@ -10,3 +10,8 @@ Parameter Group 0
 
 Epoch: 0, train Loss: 4.6107 Acc: 0.0696
 Epoch: 0, val Loss: 7.9963 Acc: 0.0109
+Epoch: 1, train Loss: 3.9986 Acc: 0.1489
+Epoch: 1, val Loss: 8.9221 Acc: 0.0086
+Epoch: 2, train Loss: 3.6527 Acc: 0.2031
+Epoch: 2, val Loss: 10.2360 Acc: 0.0051
+Epoch: 3, train Loss: 3.4031 Acc: 0.2468
