@@ -3,20 +3,20 @@ Parameter Group 0
     dampening: 0
     initial_lr: 0.001
     lr: 0.001
-    momentum: 0.9
+    momentum: 0
     nesterov: False
-    weight_decay: 0.01
+    weight_decay: 0.03
 )
 
-Epoch: 0, train_mini Loss: 5.2973 Acc: 0.0000
-Epoch: 0, val_mini Loss: 5.3091 Acc: 0.0000
-Epoch: 1, train_mini Loss: 5.2949 Acc: 0.0000
-Epoch: 1, val_mini Loss: 5.3093 Acc: 0.0000
-Epoch: 2, train_mini Loss: 5.2922 Acc: 0.0000
-Epoch: 2, val_mini Loss: 5.3095 Acc: 0.0000
-Epoch: 3, train_mini Loss: 5.2895 Acc: 0.0000
-Epoch: 3, val_mini Loss: 5.3096 Acc: 0.0000
-Epoch: 4, train_mini Loss: 5.2868 Acc: 0.0000
-Epoch: 4, val_mini Loss: 5.3098 Acc: 0.0000
-Training complete in 0m 14s
-Best val Acc: 0.000000
+Epoch: 0, train_mini Loss: 5.5062 Acc: 0.0100
+Epoch: 0, val_mini Loss: 5.5580 Acc: 0.0100
+Epoch: 1, train_mini Loss: 5.0937 Acc: 0.0000
+Epoch: 1, val_mini Loss: 7.5385 Acc: 0.0000
+Epoch: 2, train_mini Loss: 4.8486 Acc: 0.0100
+Epoch: 2, val_mini Loss: 6.2869 Acc: 0.0000
+Epoch: 3, train_mini Loss: 4.7315 Acc: 0.0400
+Epoch: 3, val_mini Loss: 7.1184 Acc: 0.0000
+Epoch: 4, train_mini Loss: 4.6451 Acc: 0.0000
+Epoch: 4, val_mini Loss: 9.3243 Acc: 0.0100
+Training complete in 0m 13s
+Best val Acc: 0.010000
