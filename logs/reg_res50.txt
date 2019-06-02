@@ -1,76 +1,35 @@
-Using optimizer: SGD (
+Using optimizer: Adam (
 Parameter Group 0
-    dampening: 0
-    initial_lr: 0.0001
-    lr: 0.0001
-    momentum: 0.9
-    nesterov: False
-    weight_decay: 0.03
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    lr: 0.0003
+    weight_decay: 0.01
 )
 
-Epoch: 0, train Loss: 5.3087 Acc: 0.0091
-Epoch: 0, val Loss: 5.1834 Acc: 0.0181
-Epoch: 1, train Loss: 5.0264 Acc: 0.0231
-Epoch: 1, val Loss: 4.8101 Acc: 0.0368
-Epoch: 2, train Loss: 4.8779 Acc: 0.0356
-Epoch: 2, val Loss: 4.7533 Acc: 0.0517
-Epoch: 3, train Loss: 4.8926 Acc: 0.0382
-Epoch: 3, val Loss: 4.6915 Acc: 0.0512
-Epoch: 4, train Loss: 4.9711 Acc: 0.0358
-Epoch: 4, val Loss: 4.7975 Acc: 0.0435
-Epoch: 5, train Loss: 5.0425 Acc: 0.0296
-Epoch: 5, val Loss: 4.9301 Acc: 0.0366
-Epoch: 6, train Loss: 5.0909 Acc: 0.0254
-Epoch: 6, val Loss: 4.9950 Acc: 0.0308
-Epoch: 7, train Loss: 5.1220 Acc: 0.0226
-Epoch: 7, val Loss: 5.0393 Acc: 0.0307
-Epoch: 8, train Loss: 5.1410 Acc: 0.0213
-Epoch: 8, val Loss: 5.0503 Acc: 0.0247
-Epoch: 9, train Loss: 5.1577 Acc: 0.0189
-Epoch: 9, val Loss: 5.0545 Acc: 0.0219
-Epoch: 10, train Loss: 5.1721 Acc: 0.0174
-Epoch: 10, val Loss: 5.0897 Acc: 0.0235
-Epoch: 11, train Loss: 5.1841 Acc: 0.0164
-Epoch: 11, val Loss: 5.1107 Acc: 0.0205
-Epoch: 12, train Loss: 5.1914 Acc: 0.0165
-Epoch: 12, val Loss: 5.1223 Acc: 0.0198
-Epoch: 13, train Loss: 5.1981 Acc: 0.0157
-Epoch: 13, val Loss: 5.1368 Acc: 0.0200
-Epoch: 14, train Loss: 5.2049 Acc: 0.0151
-Epoch: 14, val Loss: 5.1502 Acc: 0.0199
-Epoch: 15, train Loss: 5.2086 Acc: 0.0151
-Epoch: 15, val Loss: 5.1460 Acc: 0.0175
-Epoch: 16, train Loss: 5.2136 Acc: 0.0131
-Epoch: 16, val Loss: 5.1403 Acc: 0.0138
-Epoch: 17, train Loss: 5.2169 Acc: 0.0131
-Epoch: 17, val Loss: 5.1558 Acc: 0.0146
-Epoch: 18, train Loss: 5.2200 Acc: 0.0120
-Epoch: 18, val Loss: 5.1867 Acc: 0.0136
-Epoch: 19, train Loss: 5.2231 Acc: 0.0115
-Epoch: 19, val Loss: 5.1755 Acc: 0.0131
-Epoch: 20, train Loss: 5.2235 Acc: 0.0112
-Epoch: 20, val Loss: 5.1704 Acc: 0.0137
-Epoch: 21, train Loss: 5.2250 Acc: 0.0104
-Epoch: 21, val Loss: 5.1659 Acc: 0.0124
-Epoch: 22, train Loss: 5.2256 Acc: 0.0099
-Epoch: 22, val Loss: 5.1733 Acc: 0.0113
-Epoch: 23, train Loss: 5.2270 Acc: 0.0092
-Epoch: 23, val Loss: 5.1588 Acc: 0.0126
-Epoch: 24, train Loss: 5.2268 Acc: 0.0095
-Epoch: 24, val Loss: 5.1866 Acc: 0.0111
-Epoch: 25, train Loss: 5.2270 Acc: 0.0091
-Epoch: 25, val Loss: 5.1910 Acc: 0.0118
-Epoch: 26, train Loss: 5.2267 Acc: 0.0092
-Epoch: 26, val Loss: 5.1833 Acc: 0.0108
-Epoch: 27, train Loss: 5.2274 Acc: 0.0094
-Epoch: 27, val Loss: 5.1879 Acc: 0.0103
-Epoch: 28, train Loss: 5.2269 Acc: 0.0091
-Epoch: 28, val Loss: 5.1757 Acc: 0.0104
-Epoch: 29, train Loss: 5.2260 Acc: 0.0092
-Epoch: 29, val Loss: 5.1702 Acc: 0.0100
-Epoch: 30, train Loss: 5.2267 Acc: 0.0092
-Epoch: 30, val Loss: 5.1861 Acc: 0.0099
-Epoch: 31, train Loss: 5.2258 Acc: 0.0094
-Epoch: 31, val Loss: 5.1406 Acc: 0.0103
-Epoch: 32, train Loss: 5.2261 Acc: 0.0097
-Epoch: 32, val Loss: 5.1638 Acc: 0.0108
+Epoch: 0, train Loss: 5.2888 Acc: 0.0082
+Epoch: 0, val Loss: 5.1919 Acc: 0.0097
+Epoch: 1, train Loss: 5.2144 Acc: 0.0094
+Epoch: 1, val Loss: 5.1526 Acc: 0.0105
+Epoch: 2, train Loss: 5.2065 Acc: 0.0100
+Epoch: 2, val Loss: 5.1425 Acc: 0.0124
+Epoch: 3, train Loss: 5.1996 Acc: 0.0110
+Epoch: 3, val Loss: 5.1422 Acc: 0.0134
+Epoch: 4, train Loss: 5.1955 Acc: 0.0112
+Epoch: 4, val Loss: 5.1258 Acc: 0.0138
+Epoch: 5, train Loss: 5.1925 Acc: 0.0107
+Epoch: 5, val Loss: 5.1246 Acc: 0.0161
+Epoch: 6, train Loss: 5.1878 Acc: 0.0110
+Epoch: 6, val Loss: 5.1236 Acc: 0.0150
+Epoch: 7, train Loss: 5.1861 Acc: 0.0112
+Epoch: 7, val Loss: 5.1121 Acc: 0.0142
+Epoch: 8, train Loss: 5.1865 Acc: 0.0115
+Epoch: 8, val Loss: 5.1460 Acc: 0.0151
+Epoch: 9, train Loss: 5.1833 Acc: 0.0116
+Epoch: 9, val Loss: 5.1028 Acc: 0.0147
+Epoch: 10, train Loss: 5.1813 Acc: 0.0119
+Epoch: 10, val Loss: 5.1161 Acc: 0.0156
+Epoch: 11, train Loss: 5.1820 Acc: 0.0118
+Epoch: 11, val Loss: 5.1093 Acc: 0.0146
+Epoch: 12, train Loss: 5.1839 Acc: 0.0116
+Epoch: 12, val Loss: 5.1199 Acc: 0.0143
