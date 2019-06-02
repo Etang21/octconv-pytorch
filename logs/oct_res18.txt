@@ -8,3 +8,29 @@ Parameter Group 0
     weight_decay: 0.0001
 )
 
+Epoch: 0, train Loss: 4.5935 Acc: 0.0719
+Epoch: 0, val Loss: 3.9482 Acc: 0.1484
+Epoch: 1, train Loss: 3.9946 Acc: 0.1492
+Epoch: 1, val Loss: 3.4379 Acc: 0.2273
+Epoch: 2, train Loss: 3.6510 Acc: 0.2024
+Epoch: 2, val Loss: 3.1047 Acc: 0.2896
+Epoch: 3, train Loss: 3.3965 Acc: 0.2493
+Epoch: 3, val Loss: 2.8500 Acc: 0.3385
+Epoch: 4, train Loss: 3.2041 Acc: 0.2837
+Epoch: 4, val Loss: 2.6730 Acc: 0.3748
+Epoch: 5, train Loss: 3.0454 Acc: 0.3116
+Epoch: 5, val Loss: 2.5090 Acc: 0.4014
+Epoch: 6, train Loss: 2.9033 Acc: 0.3399
+Epoch: 6, val Loss: 2.4419 Acc: 0.4277
+Epoch: 7, train Loss: 2.7936 Acc: 0.3600
+Epoch: 7, val Loss: 2.3409 Acc: 0.4452
+Epoch: 8, train Loss: 2.6865 Acc: 0.3810
+Epoch: 8, val Loss: 2.2357 Acc: 0.4716
+Epoch: 9, train Loss: 2.5955 Acc: 0.3977
+Epoch: 9, val Loss: 2.2083 Acc: 0.4781
+Epoch: 10, train Loss: 2.5144 Acc: 0.4152
+Epoch: 10, val Loss: 2.1415 Acc: 0.4866
+Epoch: 11, train Loss: 2.4317 Acc: 0.4320
+Epoch: 11, val Loss: 2.0723 Acc: 0.5017
+Epoch: 12, train Loss: 2.3568 Acc: 0.4466
+Epoch: 12, val Loss: 2.0366 Acc: 0.5155
