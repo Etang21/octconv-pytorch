@@ -4,70 +4,81 @@ from modules import OctConv2d
 
 def test_octconv_shapes():
     """A series of tests to ensure the shapes of our Octconv layers line up"""
-    # Test output shapes for 1x1 convolution
-    oc = OctConv2d(16, 16, (1, 1), 0.5, 0.5)
-    input_h = torch.randn(128, 8, 32, 32)
-    input_l = torch.randn(128, 8, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 8, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
-    assert output_l.shape == (128, 8, 16, 16), "Incorrect low-frequency output shape for OctConv2d"
-    
-    
-    # Test output shapes for 1x1 convolution
-    oc = OctConv2d(16, 16, (1, 1), 0.5, 0.5)
-    input_h = torch.randn(128, 8, 32, 32)
-    input_l = torch.randn(128, 8, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 8, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
-    assert output_l.shape == (128, 8, 16, 16), "Incorrect low-frequency output shape for OctConv2d"
-    
-    # Test output shapes with alpha_in != alpha_out
-    oc = OctConv2d(16, 16, (1, 1), 0.5, 0.25)
-    input_h = torch.randn(128, 8, 32, 32)
-    input_l = torch.randn(128, 8, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 12, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
-    assert output_l.shape == (128, 4, 16, 16), "Incorrect low-frequency output shape for OctConv2d"
-    
-    # Test output shapes with alpha_in != alpha_out and in_channels != out_channels
-    oc = OctConv2d(16, 32, (1, 1), 0.5, 0.25)
-    input_h = torch.randn(128, 8, 32, 32)
-    input_l = torch.randn(128, 8, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 24, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
-    assert output_l.shape == (128, 8, 16, 16), "Incorrect low-frequency output shape for OctConv2d"
-    
-    # Test output shapes with alpha_in = alpha_out = 0
-    oc = OctConv2d(16, 32, (1, 1), 0, 0)
-    input_h = torch.randn(128, 16, 32, 32)
-    input_l = torch.randn(128, 0, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 32, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
-    assert output_l is None, "Incorrect low-frequency output shape for OctConv2d"
-    
-    # Test output shapes with alpha_in = 0, alpha_out > 0 (imitates first layer)
-    oc = OctConv2d(16, 32, (1, 1), 0, 0.25)
-    input_h = torch.randn(128, 16, 32, 32)
-    input_l = None
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 24, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
-    assert output_l.shape == (128, 8, 16, 16), "Incorrect low-frequency output shape for OctConv2d"
-    
-    # Test output shapes with padding and stride
-    oc = OctConv2d(16, 32, (3, 3), 0.5, 0.5, stride=1, padding=1)
-    input_h = torch.randn(128, 8, 32, 32)
-    input_l = torch.randn(128, 8, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 16, 32, 32), "Shape mismatch for stride=1, padding=1"
-    assert output_l.shape == (128, 16, 16, 16), "Shape mismatch for stride=1, padding=1"
-    
-    # Test output shapes with stride to downsample
-    oc = OctConv2d(16, 32, (2, 2), 0.5, 0.5, stride=2, padding=0)
-    input_h = torch.randn(128, 8, 32, 32)
-    input_l = torch.randn(128, 8, 16, 16)
-    output_h, output_l = oc(input_h, input_l)
-    assert output_h.shape == (128, 16, 16, 16), "Shape mismatch for stride=2, padding=0"
-    assert output_l.shape == (128, 16, 8, 8), "Shape mismatch for stride=2, padding=0"
+    for freq_ratio in [2, 3, 5, 7]:
+        # Test output shapes for 1x1 convolution
+        oc = OctConv2d(16, 16, (1, 1), 0.5, 0.5, freq_ratio=freq_ratio)
+        input_h = torch.randn(128, 8, 30, 30)
+        input_l = torch.randn(128, 8, 30//freq_ratio, 30//freq_ratio)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 8, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 8, 30//freq_ratio, 30//freq_ratio), "Incorrect low-frequency output shape for OctConv2d"
+
+        """
+        # Test output shapes for 1x1 convolution
+        oc = OctConv2d(16, 16, (1, 1), 0.5, 0.5)
+        input_h = torch.randn(128, 8, 32, 32)
+        input_l = torch.randn(128, 8, 16, 16)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 8, 32, 32), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 8, 16, 16), "Incorrect low-frequency output shape for OctConv2d"
+        """
+        
+        # Test output shapes with alpha_in != alpha_out
+        oc = OctConv2d(16, 16, (1, 1), 0.5, 0.25, freq_ratio=freq_ratio)
+        input_h = torch.randn(128, 8, 30, 30)
+        input_l = torch.randn(128, 8, 30//freq_ratio, 30//freq_ratio)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 12, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 4, 30//freq_ratio, 30//freq_ratio), "Incorrect low-frequency output shape for OctConv2d"
+
+        # Test output shapes with alpha_in != alpha_out and in_channels != out_channels
+        oc = OctConv2d(16, 32, (1, 1), 0.5, 0.25, freq_ratio=freq_ratio)
+        input_h = torch.randn(128, 8, 30, 30)
+        input_l = torch.randn(128, 8, 30//freq_ratio, 30//freq_ratio)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 24, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 8, 30//freq_ratio, 30//freq_ratio), "Incorrect low-frequency output shape for OctConv2d"
+
+        # Test output shapes with alpha_in = alpha_out = 0
+        oc = OctConv2d(16, 32, (1, 1), 0, 0, freq_ratio=freq_ratio)
+        input_h = torch.randn(128, 16, 30, 30)
+        input_l = None
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 32, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l is None, "Incorrect low-frequency output shape for OctConv2d"
+
+        # Test output shapes with alpha_in = 0, alpha_out > 0 (imitates first layer)
+        oc = OctConv2d(16, 32, (1, 1), 0, 0.25, freq_ratio=freq_ratio)
+        input_h = torch.randn(128, 16, 30, 30)
+        input_l = None
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 24, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 8, 30//freq_ratio, 30//freq_ratio), "Incorrect low-frequency output shape for OctConv2d"
+
+        # Test output shapes with alpha_in > 0, alpha_out = 0
+        oc = OctConv2d(16, 32, (1, 1), 0.25, 0, freq_ratio=freq_ratio)
+        input_h = torch.randn(128, 12, 30, 30)
+        input_l = torch.randn(128, 4, 30, 30)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 32, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l is None, "Incorrect low-frequency output shape for OctConv2d"
+        
+        # Test output shapes with padding
+        oc = OctConv2d(16, 32, (3, 3), 0.5, 0.5, freq_ratio=freq_ratio, stride=1, padding=1)
+        input_h = torch.randn(128, 8, 30, 30)
+        input_l = torch.randn(128, 8, 30//freq_ratio, 30//freq_ratio)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 16, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 16, 30//freq_ratio, 30//freq_ratio), "Incorrect low-frequency output shape for OctConv2d"
+
+        # Test output shapes with stride to downsample
+        oc = OctConv2d(16, 32, (2, 2), 0.5, 0.5, freq_ratio=freq_ratio, stride=2, padding=0)
+        input_h = torch.randn(128, 8, 60, 60)
+        input_l = torch.randn(128, 8, 60//freq_ratio, 60//freq_ratio)
+        output_h, output_l = oc(input_h, input_l)
+        assert output_h.shape == (128, 16, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
+        assert output_l.shape == (128, 16, 30//freq_ratio, 30//freq_ratio), "Incorrect low-frequency output shape for OctConv2d"
+
 
 def test_octconv_as_conv():
     # Test that OctConv2d behaves like Conv2d when alpha_in = alpha_out = 0
