@@ -4,7 +4,7 @@ from modules import OctConv2d
 
 def test_octconv_shapes():
     """A series of tests to ensure the shapes of our Octconv layers line up"""
-    for freq_ratio in [2, 3, 5, 7]:
+    for freq_ratio in [2, 3, 5, 6]:
         # Test output shapes for 1x1 convolution
         oc = OctConv2d(16, 16, (1, 1), 0.5, 0.5, freq_ratio=freq_ratio)
         input_h = torch.randn(128, 8, 30, 30)
@@ -58,7 +58,7 @@ def test_octconv_shapes():
         # Test output shapes with alpha_in > 0, alpha_out = 0
         oc = OctConv2d(16, 32, (1, 1), 0.25, 0, freq_ratio=freq_ratio)
         input_h = torch.randn(128, 12, 30, 30)
-        input_l = torch.randn(128, 4, 30, 30)
+        input_l = torch.randn(128, 4, 30//freq_ratio, 30//freq_ratio)
         output_h, output_l = oc(input_h, input_l)
         assert output_h.shape == (128, 32, 30, 30), "Incorrect high-frequency output shape for OctConv2d"
         assert output_l is None, "Incorrect low-frequency output shape for OctConv2d"

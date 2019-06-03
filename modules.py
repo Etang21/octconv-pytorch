@@ -148,9 +148,11 @@ class OctConv2d(nn.Module):
             # pad zeros for stacking
             spillover = out_l.shape[1] % (freq_ratio**2)
             if spillover != 0:
-                zero_padding_shape = out_l.shape
-                zero_padding_shape[1] = freq_ratio**2 - spillover
-                out_l = torch.cat([out_l, torch.zeros(zero_padding_shape)], dim=1)
+                ## zero_padding_shape = list(out_l.shape)
+                ## zero_padding_shape[1] = freq_ratio**2 - spillover
+                out_l = F.pad(out_l, (0, 0, 0, 0, 0, freq_ratio**2 - spillover), 'constant', 0) 
+                # pytorch documentation warns of nondeterministic behavior in backpropagation when using F.pad??
+                ## out_l = torch.cat([out_l, torch.zeros(zero_padding_shape)], dim=1) # need to specify device for torch.zeros?
             out_l_slices = torch.split(out_l, out_l.shape[1]//(freq_ratio**2), dim=1)
             out_l_aggregate = torch.cat([torch.cat([out_l_slices[ii] for ii in range(jj*freq_ratio, (jj+1)*freq_ratio)], dim=3) \
                                          for jj in range(freq_ratio)], dim=2)
@@ -321,14 +323,19 @@ def get_SixLayerConvNet():
     model = nn.Sequential(
         nn.Conv2d(channels[0], channels[1], (3, 3), padding=1),
         nn.ReLU(),
+        nn.BatchNorm2d(channels[1]),
         nn.Conv2d(channels[1], channels[2], (3, 3), padding=1),
         nn.ReLU(),
+        nn.BatchNorm2d(channels[2]),
         nn.Conv2d(channels[2], channels[3], (2, 2), padding=0, stride=2), # Downsamples
         nn.ReLU(),
+        nn.BatchNorm2d(channels[3]),
         nn.Conv2d(channels[3], channels[4], (3, 3), padding=1),
         nn.ReLU(),
+        nn.BatchNorm2d(channels[4]),
         nn.Conv2d(channels[4], channels[5], (3, 3), padding=1),
         nn.ReLU(),
+        nn.BatchNorm2d(channels[5]),
         nn.Conv2d(channels[5], channels[6], (2, 2), padding=0, stride=2), # Downsamples
         nn.ReLU(),
         Flatten(),
@@ -350,15 +357,15 @@ def get_SixLayerOctConvNet(alpha, freq_ratio, hidden_channels, C, H, W, fc_1, D_
     model = nn.Sequential(
         nn.Conv2d(C, hidden_channels, (3, 3), padding=1), # First layer is conv2D as in paper
         nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), 0, alpha, freq_ratio=freq_ratio, stride=1, padding=1),
+        OctConv2dBN(hidden_channels, hidden_channels, (3, 3), 0, alpha, freq_ratio=freq_ratio, stride=1, padding=1),
         nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (2, 2), alpha, alpha, freq_ratio=freq_ratio, padding=0, stride=2), # Downsamples
+        OctConv2dBN(hidden_channels, hidden_channels, (2, 2), alpha, alpha, freq_ratio=freq_ratio, padding=0, stride=2), # Downsamples
         nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, freq_ratio=freq_ratio, stride=1, padding=1),
+        OctConv2dBN(hidden_channels, hidden_channels, (3, 3), alpha, alpha, freq_ratio=freq_ratio, stride=1, padding=1),
         nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (3, 3), alpha, alpha, freq_ratio=freq_ratio, stride=1, padding=1),
+        OctConv2dBN(hidden_channels, hidden_channels, (3, 3), alpha, alpha, freq_ratio=freq_ratio, stride=1, padding=1),
         nn.ReLU(),
-        OctConv2dStackable(hidden_channels, hidden_channels, (2, 2), alpha, 0, freq_ratio=freq_ratio, padding=0, stride=2), # Downsamples
+        OctConv2dBN(hidden_channels, hidden_channels, (2, 2), alpha, 0, freq_ratio=freq_ratio, padding=0, stride=2), # Downsamples
         nn.ReLU(),
         Flatten(),
         nn.Linear(hidden_channels * (H // 4) * (W // 4), fc_1),
@@ -366,6 +373,16 @@ def get_SixLayerOctConvNet(alpha, freq_ratio, hidden_channels, C, H, W, fc_1, D_
         nn.Linear(fc_1, D_out)
         )
     
-    # TODO: Add Kaiming-He initialization code here?
-    
+    for m in model.modules():
+        if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+            nn.init.kaiming_normal_(m.weight)
+        elif isinstance(m, OctConv2d):
+            nn.init.kaiming_normal_(m.conv_hh.weight)
+            if m.has_in_l and m.has_out_l:
+                nn.init.kaiming_normal_(m.conv_ll.weight)
+            if m.has_in_l:
+                nn.init.kaiming_normal_(m.conv_lh.weight)
+            if m.has_out_l:
+                nn.init.kaiming_normal_(m.conv_hl.weight)
+            
     return model
