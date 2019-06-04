@@ -1,0 +1,92 @@
+Using optimizer: Adam (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    eps: 1e-08
+    initial_lr: 0.0001
+    lr: 0.0001
+    weight_decay: 0.0001
+)
+
+Epoch: 0, train Loss: 4.6400 Acc: 0.0666
+Epoch: 0, val Loss: 3.9598 Acc: 0.1446
+Epoch: 1, train Loss: 4.0612 Acc: 0.1410
+Epoch: 1, val Loss: 3.4969 Acc: 0.2151
+Epoch: 2, train Loss: 3.7611 Acc: 0.1885
+Epoch: 2, val Loss: 3.2243 Acc: 0.2670
+Epoch: 3, train Loss: 3.5431 Acc: 0.2230
+Epoch: 3, val Loss: 3.0243 Acc: 0.3057
+Epoch: 4, train Loss: 3.3539 Acc: 0.2540
+Epoch: 4, val Loss: 2.8661 Acc: 0.3319
+Epoch: 5, train Loss: 3.2119 Acc: 0.2832
+Epoch: 5, val Loss: 2.7091 Acc: 0.3664
+Epoch: 6, train Loss: 3.0955 Acc: 0.3031
+Epoch: 6, val Loss: 2.6400 Acc: 0.3805
+Epoch: 7, train Loss: 2.9905 Acc: 0.3218
+Epoch: 7, val Loss: 2.5307 Acc: 0.4022
+Epoch: 8, train Loss: 2.8975 Acc: 0.3414
+Epoch: 8, val Loss: 2.4648 Acc: 0.4197
+Epoch: 9, train Loss: 2.7962 Acc: 0.3604
+Epoch: 9, val Loss: 2.3977 Acc: 0.4320
+Epoch: 10, train Loss: 2.7255 Acc: 0.3741
+Epoch: 10, val Loss: 2.3396 Acc: 0.4507
+Epoch: 11, train Loss: 2.6547 Acc: 0.3869
+Epoch: 11, val Loss: 2.2823 Acc: 0.4572
+Epoch: 12, train Loss: 2.5820 Acc: 0.4011
+Epoch: 12, val Loss: 2.2524 Acc: 0.4657
+Epoch: 13, train Loss: 2.5178 Acc: 0.4124
+Epoch: 13, val Loss: 2.1954 Acc: 0.4825
+Epoch: 14, train Loss: 2.4637 Acc: 0.4246
+Epoch: 14, val Loss: 2.2013 Acc: 0.4801
+Epoch: 15, train Loss: 2.4083 Acc: 0.4354
+Epoch: 15, val Loss: 2.1288 Acc: 0.4989
+Epoch: 16, train Loss: 2.3478 Acc: 0.4473
+Epoch: 16, val Loss: 2.0843 Acc: 0.5100
+Epoch: 17, train Loss: 2.2996 Acc: 0.4582
+Epoch: 17, val Loss: 2.0669 Acc: 0.5105
+Epoch: 18, train Loss: 2.2506 Acc: 0.4686
+Epoch: 18, val Loss: 2.0524 Acc: 0.5152
+Epoch: 19, train Loss: 2.1921 Acc: 0.4798
+Epoch: 19, val Loss: 2.0331 Acc: 0.5217
+Epoch: 20, train Loss: 2.1420 Acc: 0.4901
+Epoch: 20, val Loss: 2.0006 Acc: 0.5291
+Epoch: 21, train Loss: 2.1021 Acc: 0.4992
+Epoch: 21, val Loss: 1.9958 Acc: 0.5317
+Epoch: 22, train Loss: 2.0559 Acc: 0.5086
+Epoch: 22, val Loss: 1.9750 Acc: 0.5385
+Epoch: 23, train Loss: 2.0155 Acc: 0.5181
+Epoch: 23, val Loss: 1.9698 Acc: 0.5394
+Epoch: 24, train Loss: 1.9655 Acc: 0.5275
+Epoch: 24, val Loss: 1.9569 Acc: 0.5441
+Epoch: 25, train Loss: 1.9322 Acc: 0.5368
+Epoch: 25, val Loss: 1.9261 Acc: 0.5484
+Epoch: 26, train Loss: 1.8998 Acc: 0.5442
+Epoch: 26, val Loss: 1.9173 Acc: 0.5521
+Epoch: 27, train Loss: 1.8610 Acc: 0.5523
+Epoch: 27, val Loss: 1.9110 Acc: 0.5560
+Epoch: 28, train Loss: 1.8200 Acc: 0.5608
+Epoch: 28, val Loss: 1.8930 Acc: 0.5557
+Epoch: 29, train Loss: 1.7944 Acc: 0.5655
+Epoch: 29, val Loss: 1.8855 Acc: 0.5591
+Epoch: 30, train Loss: 1.7612 Acc: 0.5737
+Epoch: 30, val Loss: 1.8760 Acc: 0.5625
+Epoch: 31, train Loss: 1.7471 Acc: 0.5768
+Epoch: 31, val Loss: 1.8679 Acc: 0.5658
+Epoch: 32, train Loss: 1.7199 Acc: 0.5831
+Epoch: 32, val Loss: 1.8724 Acc: 0.5650
+Epoch: 33, train Loss: 1.7014 Acc: 0.5876
+Epoch: 33, val Loss: 1.8829 Acc: 0.5604
+Epoch: 34, train Loss: 1.6927 Acc: 0.5890
+Epoch: 34, val Loss: 1.8584 Acc: 0.5675
+Epoch: 35, train Loss: 1.6714 Acc: 0.5932
+Epoch: 35, val Loss: 1.8659 Acc: 0.5639
+Epoch: 36, train Loss: 1.6639 Acc: 0.5962
+Epoch: 36, val Loss: 1.8635 Acc: 0.5659
+Epoch: 37, train Loss: 1.6566 Acc: 0.5979
+Epoch: 37, val Loss: 1.8595 Acc: 0.5683
+Epoch: 38, train Loss: 1.6558 Acc: 0.5991
+Epoch: 38, val Loss: 1.8576 Acc: 0.5637
+Epoch: 39, train Loss: 1.6540 Acc: 0.5972
+Epoch: 39, val Loss: 1.8585 Acc: 0.5662
+Training complete in 927m 36s
+Best val Acc: 0.568300
