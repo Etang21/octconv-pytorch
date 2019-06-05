@@ -6,7 +6,9 @@ OctConv2d is our building block. Takes in x_h, x_l and returns out_h and out_l.
 OctConv2dStackable implements some tensor rearrangements to achieve the same functionality
 with just one input and one output.
 
-## appears to have issues with gpu... TODO
+To address:
+## gpu
+## downsampling
 
 """
 
